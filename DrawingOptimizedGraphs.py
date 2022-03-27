@@ -9,14 +9,22 @@ def parseFile(inputFile):
     
     for edge in inputFileSplitByRow:
         leftNode, rightNode = edge.split('->')[0], edge.split('->')[1]
+        
         if leftNode in adjacencyList:
             adjacencyList[leftNode].append(rightNode)
+            if rightNode not in adjacencyList:
+                adjacencyList[rightNode] = [leftNode]
+            else:
+                adjacencyList[rightNode].append(leftNode)
+        
         else:
             adjacencyList[leftNode] = [rightNode]
-    
+            adjacencyList[rightNode] = [leftNode]
+
+    print(adjacencyList)
     return adjacencyList
 
-def createNode(x, y, r, canvasName): #center coordinates, radius
+def createNode(x, y, r, canvasName): # center coordinates, radius
     x0 = x - r
     y0 = y - r
     x1 = x + r
@@ -26,11 +34,11 @@ def createNode(x, y, r, canvasName): #center coordinates, radius
 def drawNodes(values):
     window = Tk()
     canvas = Canvas(window)
-    canvas.pack()
+    canvas.pack(fill="both", expand=True)
 
     X = 50
     Y = 40
-    radius = 35 #never changes
+    radius = 35 # never changes
 
     for value in values:
         createNode(X, Y, radius, canvas)
@@ -44,3 +52,7 @@ def drawNodes(values):
 fileName = input('Please enter name of input file: ')
 adjacencyList = parseFile(fileName)
 drawNodes(adjacencyList.keys())
+
+# resize window
+# x,y axis thing, draw lines, can have overlapping edges (place em in a circle)
+# place circles on large 2D grid
