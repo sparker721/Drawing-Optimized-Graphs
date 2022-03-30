@@ -1,4 +1,5 @@
 from tkinter import *
+from PIL import Image
 
 def parseFile(inputFile):
     f = open(inputFile, 'r')
@@ -33,6 +34,8 @@ def createNode(x, y, r, canvasName): # center coordinates, radius
 
 def drawNodes(values):
     window = Tk()
+    window.title("Drawing Optimized Graphs")
+    window.state("zoomed")
     canvas = Canvas(window)
     canvas.pack(fill="both", expand=True)
 
@@ -47,9 +50,15 @@ def drawNodes(values):
         #Y += 60
         canvas.update()
 
+    canvas.postscript(file = (imageFile+".eps"), colormode = "color")
     window.mainloop()
+    image = Image.open((imageFile+".eps"))
+    image.load(scale = 10)
+    image.save((imageFile + ".jpeg"), format = "jpeg", quality = 100)
+
 
 fileName = input('Please enter name of input file: ')
+imageFile = fileName.strip(".txt")
 adjacencyList = parseFile(fileName)
 drawNodes(adjacencyList.keys())
 
