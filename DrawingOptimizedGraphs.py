@@ -83,10 +83,11 @@ def drawEdges(adjacencyList, nodes):
 fileName = input('Please enter name of input file: ')
 imageFile = fileName.strip(".txt")
 adjacencyList = parseFile(fileName)
-
 window = Tk()
 window.title("Drawing Optimized Graphs")
 window.state("zoomed")
+length = len(adjacencyList)
+window.geometry("{}x{}".format(length*80, (length+2)*90))
 canvas = Canvas(window)
 canvas.update()
 canvas.pack(fill=BOTH, expand=YES)
