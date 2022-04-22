@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image
 from math import *
+import re
 
 def parseFile(inputFile):
     f = open(inputFile, 'r')
@@ -10,6 +11,15 @@ def parseFile(inputFile):
     adjacencyList = {}
 
     for edge in inputFileSplitByRow:
+        # If input file does not meet formatting requirements, return error
+        if (re.search("->" , edge) == None):
+            print("ERROR: Please make sure formatting of input file matches 'firstNodeLabel->secondNodeLabel'")
+            return None
+
+        # Input file has weighted edges
+        if (re.search("w([0-9])+" , edge) != None):
+            return WeightedAdjacencyList(inputFile)
+        
         leftNode, rightNode = edge.split('->')[0], edge.split('->')[1]
 
         if leftNode in adjacencyList:
@@ -22,6 +32,39 @@ def parseFile(inputFile):
         else:
             adjacencyList[leftNode] = [rightNode]
 
+            adjacencyList[rightNode] = [leftNode]
+
+    return adjacencyList
+
+def WeightedAdjacencyList(inputFile):
+    f = open(inputFile, 'r')
+    content = f.read()
+    inputFileSplitByRow = content.splitlines()
+    
+    adjacencyList = {}
+    sortingList = []
+    for edge in inputFileSplitByRow:
+        if (re.search("w([0-9])+" , edge) == None):
+            print("ERROR: Please make sure input file has specified all weighted edges")
+            return None
+
+        weight = re.search("w([0-9])+" , edge).group(0)[1:]
+        edgeToDraw = re.split("w([0-9])+" , edge)[0]
+        sortingList.append(weight + '#' + edgeToDraw)
+
+    sortingList.sort()
+    for item in sortingList:
+        leftNode, rightNode = (item.split("#")[1]).split("->")[0], (item.split("#")[1]).split("->")[1]
+        
+        if leftNode in adjacencyList:
+            adjacencyList[leftNode].append(rightNode)
+            if rightNode not in adjacencyList:
+                adjacencyList[rightNode] = [leftNode]
+            else:
+                adjacencyList[rightNode].append(leftNode)
+
+        else:
+            adjacencyList[leftNode] = [rightNode]
             adjacencyList[rightNode] = [leftNode]
 
     return adjacencyList
@@ -83,20 +126,19 @@ def drawEdges(adjacencyList, nodes):
 fileName = input('Please enter name of input file: ')
 imageFile = fileName.strip(".txt")
 adjacencyList = parseFile(fileName)
-window = Tk()
-window.title("Drawing Optimized Graphs")
-window.state("zoomed")
-length = len(adjacencyList)
-window.geometry("{}x{}".format(length*80, (length+2)*90))
-canvas = Canvas(window)
-canvas.update()
-canvas.pack(fill=BOTH, expand=YES)
 
-drawGraph(adjacencyList.keys())
-canvas.update()
+if adjacencyList != None:
+    window = Tk()
+    window.title("Drawing Optimized Graphs")
+    window.state("zoomed")
+    length = len(adjacencyList)
+    window.geometry("{}x{}".format(length*80, (length+2)*90))
+    canvas = Canvas(window)
+    canvas.update()
+    canvas.pack(fill=BOTH, expand=YES)
 
-canvas.postscript(file = (imageFile+".eps"), colormode = "color")
-window.mainloop()
-#image = Image.open((imageFile+".eps"))
-#image.load(scale = 10)
-#image.save((imageFile + ".jpeg"), format = "jpeg", quality = 100)
+    drawGraph(adjacencyList.keys())
+    canvas.update()
+
+    canvas.postscript(file = (imageFile+".eps"), colormode = "color")
+    window.mainloop()
